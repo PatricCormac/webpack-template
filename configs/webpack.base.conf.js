@@ -54,7 +54,7 @@ module.exports = {
             options: {
               sourceMap: true,
               config: {
-                path: `${PATHS.src}/js/postcss.config.js`
+                path: './postcss.config.js'
               }
             }
           }
@@ -74,7 +74,7 @@ module.exports = {
             options: {
               sourceMap: true,
               config: {
-                path: `${PATHS.src}/js/postcss.config.js`
+                path: './postcss.config.js'
               }
             }
           },
@@ -100,6 +100,11 @@ module.exports = {
       }
     ],
   },
+  resolve: {
+    alias: {
+      '~': 'src',
+    }
+  },
   plugins: [
     new MiniCssExtarctPlugin({
       filename: `${PATHS.assets}css/[name].[hash].css`
@@ -111,8 +116,8 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: `${PATHS.src}/img`, to: `${PATHS.assets}img` },
-        { from: `${PATHS.src}/fonts`, to: `${PATHS.assets}fonts` },
+        { from: `${PATHS.src}/${PATHS.assets}img`, to: `${PATHS.assets}img` },
+        { from: `${PATHS.src}/${PATHS.assets}fonts`, to: `${PATHS.assets}fonts` },
         { from: `${PATHS.src}/static`, to: '' }
       ],
     }),
