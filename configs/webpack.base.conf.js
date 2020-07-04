@@ -90,6 +90,13 @@ module.exports = {
         options: {
           name: '[name].[ext]'
         }
+      },
+      {
+        test: /\.(ttf|woff(2)?|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]'
+        }
       }
     ],
   },
@@ -105,6 +112,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: `${PATHS.src}/img`, to: `${PATHS.assets}img` },
+        { from: `${PATHS.src}/fonts`, to: `${PATHS.assets}fonts` },
         { from: `${PATHS.src}/static`, to: '' }
       ],
     }),
