@@ -3,8 +3,49 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const TerserWebpackPlugin = require("terser-webpack-plugin");
+const loader = require("sass-loader");
 
 const isDev = process.env.NODE_ENV === "development";
+
+const optimization = () => {
+  const config = {
+    splitChunks: {
+      chunks: "all",
+    },
+  };
+
+  if (!isDev) {
+    config.minimizer = [
+      new OptimizeCssAssetsPlugin(),
+      new TerserWebpackPlugin(),
+    ];
+  }
+
+  return config;
+};
+
+const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
+
+const cssLoaders = (extra) => {
+  const loaders = [
+    {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        hmr: isDev,
+        reloadAll: true,
+      },
+    },
+    "css-loader",
+  ];
+
+  if (extra) {
+    loader.push(extra);
+  }
+
+  return loaders;
+};
 
 module.exports = {
   context: path.resolve(__dirname, "src"),
@@ -13,14 +54,10 @@ module.exports = {
     analytics: "./analytics.js",
   },
   output: {
-    filename: "[name].[contenthash].js",
+    filename: filename("js"),
     path: path.resolve(__dirname, "dist"),
   },
-  optimization: {
-    splitChunks: {
-      chunks: "all",
-    },
-  },
+  optimization: optimization(),
   devServer: {
     port: 9000,
     hot: isDev,
@@ -28,6 +65,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./index.html",
+      minify: {
+        collapseWhitespace: !isDev,
+      },
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
@@ -39,23 +79,22 @@ module.exports = {
       ],
     }),
     new MiniCssExtractPlugin({
-      filename: "[name].[contenthash].css",
+      filename: filename("css"),
     }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              hmr: isDev,
-              reloadAll: true,
-            },
-          },
-          "css-loader",
-        ],
+        use: cssLoaders(),
+      },
+      {
+        test: /\.less$/,
+        use: cssLoaders("less-loader"),
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: cssLoaders("sass-loader"),
       },
       {
         test: /\.(ttf|woff|woff2|eot)$/,
