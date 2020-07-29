@@ -12,6 +12,11 @@ module.exports = {
     filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "dist"),
   },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: "./index.html",

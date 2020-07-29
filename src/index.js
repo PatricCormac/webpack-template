@@ -1,3 +1,4 @@
+//import * as $ from "jquery";
 import Post from "./Post";
 import json from "./assets/title";
 import "./styles/styles.css";
