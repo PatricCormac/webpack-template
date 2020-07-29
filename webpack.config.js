@@ -50,7 +50,7 @@ const cssLoaders = (extra) => {
 module.exports = {
   context: path.resolve(__dirname, "src"),
   entry: {
-    main: "./index.js",
+    main: ["@babel/polyfill", "./index.js"],
     analytics: "./analytics.js",
   },
   output: {
@@ -103,6 +103,16 @@ module.exports = {
       {
         test: /\.(png|jpg|svg|gif)$/,
         use: "file-loader",
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+          },
+        },
       },
     ],
   },
