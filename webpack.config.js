@@ -2,6 +2,9 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+const isDev = process.env.NODE_ENV === "development";
 
 module.exports = {
   context: path.resolve(__dirname, "src"),
@@ -20,6 +23,7 @@ module.exports = {
   },
   devServer: {
     port: 9000,
+    hot: isDev,
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -34,12 +38,24 @@ module.exports = {
         },
       ],
     }),
+    new MiniCssExtractPlugin({
+      filename: "[name].[contenthash].css",
+    }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: isDev,
+              reloadAll: true,
+            },
+          },
+          "css-loader",
+        ],
       },
       {
         test: /\.(ttf|woff|woff2|eot)$/,
