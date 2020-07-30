@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
-const loader = require("sass-loader");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -47,22 +47,35 @@ const cssLoaders = (extra) => {
   return loaders;
 };
 
-module.exports = {
-  context: path.resolve(__dirname, "src"),
-  entry: {
-    main: ["@babel/polyfill", "./index.js"],
-    analytics: "./analytics.js",
-  },
-  output: {
-    filename: filename("js"),
-    path: path.resolve(__dirname, "dist"),
-  },
-  optimization: optimization(),
-  devServer: {
-    port: 9000,
-    hot: isDev,
-  },
-  plugins: [
+const babelOtions = (preset) => {
+  const opts = {
+    presets: ["@babel/preset-env"],
+  };
+
+  if (preset) {
+    opts.presets.push(preset);
+  }
+
+  return opts;
+};
+
+const jsLoaders = () => {
+  const loaders = [
+    {
+      loader: "babel-loader",
+      options: babelOtions(),
+    },
+  ];
+
+  if (isDev) {
+    loaders.push("eslint-loader");
+  }
+
+  return loaders;
+};
+
+const plugins = () => {
+  const base = [
     new HtmlWebpackPlugin({
       template: "./index.html",
       minify: {
@@ -81,7 +94,32 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: filename("css"),
     }),
-  ],
+  ];
+
+  if (!isDev) {
+    base.push(new BundleAnalyzerPlugin());
+  }
+
+  return base;
+};
+
+module.exports = {
+  context: path.resolve(__dirname, "src"),
+  entry: {
+    main: ["@babel/polyfill", "./index.js"],
+    //analytics: "./analytics.js",
+  },
+  output: {
+    filename: filename("js"),
+    path: path.resolve(__dirname, "dist"),
+  },
+  optimization: optimization(),
+  devServer: {
+    port: 9000,
+    hot: isDev,
+  },
+  devtool: isDev ? "source-map" : "",
+  plugins: plugins(),
   module: {
     rules: [
       {
@@ -107,12 +145,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"],
-          },
-        },
+        use: jsLoaders(),
       },
     ],
   },
