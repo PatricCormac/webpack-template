@@ -26,7 +26,8 @@ const optimization = () => {
   return config;
 };
 
-const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
+const filename = (path, ext) =>
+  isDev ? `${path}/[name].${ext}` : `${path}/[name].[hash].${ext}`;
 
 const cssLoaders = (extra) => {
   const loaders = [
@@ -92,7 +93,7 @@ const plugins = () => {
       ],
     }),
     new MiniCssExtractPlugin({
-      filename: filename("css"),
+      filename: filename("styles", "css"),
     }),
   ];
 
@@ -110,7 +111,7 @@ module.exports = {
     //analytics: "./analytics.js",
   },
   output: {
-    filename: filename("js"),
+    filename: filename("js", "js"),
     path: path.resolve(__dirname, "dist"),
   },
   optimization: optimization(),
@@ -136,11 +137,17 @@ module.exports = {
       },
       {
         test: /\.(ttf|woff|woff2|eot)$/,
-        use: "file-loader",
+        loader: "file-loader",
+        options: {
+          outputPath: "fonts",
+        },
       },
       {
         test: /\.(png|jpg|svg|gif)$/,
-        use: "file-loader",
+        loader: "file-loader",
+        options: {
+          outputPath: "img",
+        },
       },
       {
         test: /\.js$/,
