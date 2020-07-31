@@ -139,6 +139,8 @@ module.exports = {
         test: /\.(ttf|woff|woff2|eot)$/,
         loader: "file-loader",
         options: {
+          name: "[name].[ext]",
+          publicPath: "../fonts",
           outputPath: "fonts",
         },
       },
@@ -146,6 +148,8 @@ module.exports = {
         test: /\.(png|jpg|svg|gif)$/,
         loader: "file-loader",
         options: {
+          name: "[name].[ext]",
+          publicPath: "../img",
           outputPath: "img",
         },
       },
