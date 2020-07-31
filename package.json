@@ -1,7 +1,7 @@
 {
   "name": "webpack-temp",
   "version": "1.0.0",
-  "description": "",
+  "description": "Project build template",
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack --mode development",
@@ -10,7 +10,7 @@
   },
   "browserslist": "> 0.25%, not dead",
   "keywords": [],
-  "author": "",
+  "author": "PatricCormac",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.10.5",
