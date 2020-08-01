@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const ImageminPlugin = require("imagemin-webpack-plugin").default;
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -39,6 +40,10 @@ const cssLoaders = (extra) => {
       },
     },
     "css-loader",
+    {
+      loader: "postcss-loader",
+      options: { sourceMap: true, config: { path: "postcss.config.js" } },
+    },
   ];
 
   if (extra) {
@@ -92,6 +97,7 @@ const plugins = () => {
         },
       ],
     }),
+    new ImageminPlugin({ test: /\.(jpe?g|png|gif|svg)$/i }),
     new MiniCssExtractPlugin({
       filename: filename("styles", "css"),
     }),
