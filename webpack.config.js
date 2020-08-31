@@ -1,168 +1,130 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const TerserWebpackPlugin = require("terser-webpack-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
-const ImageminPlugin = require("imagemin-webpack-plugin").default;
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ImageminWebpackPlugin = require('imagemin-webpack-plugin').default;
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === 'development';
 
-const optimization = () => {
-  const config = {
+module.exports = {
+  entry: {
+    main: './src/index.js',
+  },
+  output: {
+    filename: 'js/[name].js',
+    path: path.resolve(__dirname, './build'),
+    publicPath: '/',
+  },
+  optimization: {
     splitChunks: {
-      chunks: "all",
-    },
-  };
-
-  if (!isDev) {
-    config.minimizer = [
-      new OptimizeCssAssetsPlugin(),
-      new TerserWebpackPlugin(),
-    ];
-  }
-
-  return config;
-};
-
-const filename = (path, ext) =>
-  isDev ? `${path}/[name].${ext}` : `${path}/[name].[hash].${ext}`;
-
-const cssLoaders = (extra) => {
-  const loaders = [
-    {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        hmr: isDev,
-        reloadAll: true,
+      cacheGroups: {
+        vendor: {
+          name: 'vendors',
+          test: /node_modules/,
+          chunks: 'all',
+          enforce: true,
+        },
       },
     },
-    "css-loader",
-    {
-      loader: "postcss-loader",
-      options: { sourceMap: true, config: { path: "postcss.config.js" } },
-    },
-  ];
-
-  if (extra) {
-    loaders.push(extra);
-  }
-
-  return loaders;
-};
-
-const babelOtions = (preset) => {
-  const opts = {
-    presets: ["@babel/preset-env"],
-  };
-
-  if (preset) {
-    opts.presets.push(preset);
-  }
-
-  return opts;
-};
-
-const jsLoaders = () => {
-  const loaders = [
-    {
-      loader: "babel-loader",
-      options: babelOtions(),
-    },
-  ];
-
-  if (isDev) {
-    loaders.push("eslint-loader");
-  }
-
-  return loaders;
-};
-
-const plugins = () => {
-  const base = [
-    new HtmlWebpackPlugin({
-      template: "./index.html",
-      minify: {
-        collapseWhitespace: !isDev,
-      },
+  },
+  devtool: isDev ? 'source-map' : '',
+  devServer: {
+    port: 3000,
+    hot: isDev,
+    overlay: true,
+    contentBase: './build',
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: './css/style.css',
     }),
     new CleanWebpackPlugin(),
+    new ImageminWebpackPlugin({ test: /\.(jpe?g|png|gif|svg)$/i }),
+    new HtmlWebpackPlugin({
+      hash: false,
+      template: './src/index.html',
+      filename: './index.html',
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, "src/favicon.ico"),
-          to: path.resolve(__dirname, "dist"),
+          from: './src/img',
+          to: './img',
+        },
+        {
+          from: './src/static',
+          to: '',
         },
       ],
     }),
-    new ImageminPlugin({ test: /\.(jpe?g|png|gif|svg)$/i }),
-    new MiniCssExtractPlugin({
-      filename: filename("styles", "css"),
-    }),
-  ];
-
-  if (!isDev) {
-    base.push(new BundleAnalyzerPlugin());
-  }
-
-  return base;
-};
-
-module.exports = {
-  context: path.resolve(__dirname, "src"),
-  entry: {
-    main: ["@babel/polyfill", "./index.js"],
-    //analytics: "./analytics.js",
-  },
-  output: {
-    filename: filename("js", "js"),
-    path: path.resolve(__dirname, "dist"),
-  },
-  optimization: optimization(),
-  devServer: {
-    port: 9000,
-    hot: isDev,
-  },
-  devtool: isDev ? "source-map" : "",
-  plugins: plugins(),
+  ],
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: cssLoaders(),
-      },
-      {
-        test: /\.less$/,
-        use: cssLoaders("less-loader"),
-      },
-      {
-        test: /\.s[ac]ss$/,
-        use: cssLoaders("sass-loader"),
-      },
-      {
-        test: /\.(ttf|woff|woff2|eot)$/,
-        loader: "file-loader",
-        options: {
-          name: "[name].[ext]",
-          publicPath: "../fonts",
-          outputPath: "fonts",
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+          },
         },
       },
       {
-        test: /\.(png|jpg|svg|gif)$/,
-        loader: "file-loader",
-        options: {
-          name: "[name].[ext]",
-          publicPath: "../img",
-          outputPath: "img",
-        },
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: './build/img/[name].[ext]',
+            },
+          },
+        ],
       },
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: jsLoaders(),
+        test: /\.css$/i,
+        use: [
+          'style-loader',
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [
+                require('autoprefixer'),
+                require('css-mqpacker'),
+                require('cssnano')({
+                  preset: 'default',
+                }),
+              ],
+            },
+          },
+        ],
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          'style-loader',
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [
+                require('autoprefixer'),
+                require('css-mqpacker'),
+                require('cssnano')({
+                  preset: 'default',
+                }),
+              ],
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: { sourceMap: true },
+          },
+        ],
       },
     ],
   },

@@ -1,0 +1,13 @@
+body {
+  h2 {
+    color: rgb(32, 255, 32);
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 960px) {
+  .wrapper {
+    width: 600px;
+    display: flex;
+  }
+}
