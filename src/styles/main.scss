@@ -1,0 +1,16 @@
+@import './vars';
+@import './helpers';
+
+body {
+  margin: 0;
+  font-family: $Montserrat;
+  font-size: 10px;
+  color: #333;
+  line-height: 1.6;
+  background-color: rgb(245, 129, 129);
+
+  h2 {
+    font-size: 22px;
+    color: rgb(24, 43, 218);
+  }
+}

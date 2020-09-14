@@ -1,49 +1,24 @@
 {
-  "name": "webpack-temp",
+  "name": "funbox",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "webpack-dev-server --open --mode development",
-    "build": "webpack --mode production"
-  },
-  "broserslist": [
-    "last 2 years",
-    "> 1%",
-    "not dead"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PatricCormac/webpack-template.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/PatricCormac/webpack-template/issues"
-  },
-  "homepage": "https://github.com/PatricCormac/webpack-template#readme",
+  "license": "MIT",
+  "private": "true",
   "devDependencies": {
-    "@babel/core": "^7.11.4",
-    "@babel/preset-env": "^7.11.0",
-    "autoprefixer": "^9.8.6",
-    "babel-loader": "^8.1.0",
     "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^6.0.4",
-    "css-loader": "^4.2.2",
-    "css-mqpacker": "^7.0.0",
-    "cssnano": "^4.1.10",
+    "copy-webpack-plugin": "^6.1.0",
+    "css-loader": "^4.3.0",
     "file-loader": "^6.1.0",
     "html-webpack-plugin": "^4.4.1",
-    "imagemin-webpack-plugin": "^2.4.2",
-    "mini-css-extract-plugin": "^0.11.0",
-    "path": "^0.12.7",
-    "postcss-loader": "^3.0.0",
+    "mini-css-extract-plugin": "^0.11.1",
     "sass": "^1.26.10",
-    "sass-loader": "^10.0.1",
+    "sass-loader": "^10.0.2",
     "style-loader": "^1.2.1",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
+  },
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --open --mode development"
   }
 }

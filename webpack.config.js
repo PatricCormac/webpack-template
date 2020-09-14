@@ -1,131 +1,82 @@
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ImageminWebpackPlugin = require('imagemin-webpack-plugin').default;
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
-const isDev = process.env.NODE_ENV === 'development';
-
-module.exports = {
-  entry: {
-    main: './src/index.js',
-  },
-  output: {
-    filename: 'js/[name].js',
-    path: path.resolve(__dirname, './build'),
-    publicPath: '/',
-  },
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        vendor: {
-          name: 'vendors',
-          test: /node_modules/,
-          chunks: 'all',
-          enforce: true,
-        },
+module.exports = (env, argv) => {
+  return {
+    entry: {
+      app: './src/index.js',
+    },
+    output: {
+      filename: '[name].bundle.js',
+      path: path.resolve(__dirname, 'build'),
+    },
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
       },
     },
-  },
-  devtool: isDev ? 'source-map' : '',
-  devServer: {
-    port: 3000,
-    hot: isDev,
-    overlay: true,
-    contentBase: './build',
-  },
-  plugins: [
-    new MiniCssExtractPlugin({
-      filename: './css/style.css',
-    }),
-    new CleanWebpackPlugin(),
-    new ImageminWebpackPlugin({ test: /\.(jpe?g|png|gif|svg)$/i }),
-    new HtmlWebpackPlugin({
-      hash: false,
-      template: './src/index.html',
-      filename: './index.html',
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
+    devtool: argv.mode === 'development' ? 'inline-source-map' : '',
+    devServer: {
+      contentBase: path.join(__dirname, 'build'),
+      //hot: true,
+    },
+    plugins: [
+      new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+      new MiniCssExtractPlugin(),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src/index.html'),
+      }),
+      new CopyPlugin({
+        patterns: [{ from: './src/img', to: 'img' }],
+      }),
+    ],
+    module: {
+      rules: [
         {
-          from: './src/img',
-          to: './img',
+          test: /\.css$/,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                hmr: process.env.NODE_ENV === 'development',
+              },
+            },
+            'css-loader',
+          ],
         },
         {
-          from: './src/static',
-          to: '',
+          test: /\.s[ac]ss$/,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                hmr: process.env.NODE_ENV === 'development',
+              },
+            },
+            'css-loader',
+            'sass-loader',
+          ],
+        },
+        {
+          test: /\.(png|jpg|svg|jpeg)$/,
+          loader: 'file-loader',
+          options: {
+            outputPath: 'img',
+            name: '[name].[ext]',
+          },
+        },
+        {
+          test: /\.(woff|woff2|eot|ttf|otf)$/,
+          loader: 'file-loader',
+          options: {
+            outputPath: 'fonts',
+            name: '[name].[ext]',
+          },
         },
       ],
-    }),
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.m?js$/,
-        exclude: /(node_modules|bower_components)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env'],
-          },
-        },
-      },
-      {
-        test: /\.(png|jpe?g|gif|svg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: './build/img/[name].[ext]',
-            },
-          },
-        ],
-      },
-      {
-        test: /\.css$/i,
-        use: [
-          'style-loader',
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: [
-                require('autoprefixer'),
-                require('css-mqpacker'),
-                require('cssnano')({
-                  preset: 'default',
-                }),
-              ],
-            },
-          },
-        ],
-      },
-      {
-        test: /\.s[ac]ss$/i,
-        use: [
-          'style-loader',
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: [
-                require('autoprefixer'),
-                require('css-mqpacker'),
-                require('cssnano')({
-                  preset: 'default',
-                }),
-              ],
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: { sourceMap: true },
-          },
-        ],
-      },
-    ],
-  },
+    },
+  };
 };
